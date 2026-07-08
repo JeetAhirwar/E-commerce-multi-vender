@@ -1,0 +1,26 @@
+{
+    "name": "Ecommerce-backend-node",
+    "version": "1.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "node --watch src/server.js",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --detectOpenHandles"
+    },
+    "dependencies": {
+        "compression": "^1.7.5",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
+        "express": "^5.0.1",
+        "helmet": "^8.0.0",
+        "mongoose": "^8.10.0",
+        "pino": "^9.6.0",
+        "pino-http": "^10.4.0"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "supertest": "^7.0.0"
+    }
+}
