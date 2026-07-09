@@ -38,7 +38,7 @@ describe('Phase 1 Foundation - Core Express Integration Tests Suite', () =>
 
         expect(response.body.online).toBe(true);
         expect(response.body.databaseConnected).toBe(true);
-        expect(response.body.message).toContain('Jeets');
+        expect(response.body.message).toContain('Welcome to Jeet Ahirwar Marketplace API Gateway');
     });
 
     it('GET / - Should return databaseConnected status false when DB is offline', async () =>
