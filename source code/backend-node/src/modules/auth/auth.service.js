@@ -76,7 +76,7 @@ export const createAuthService = ({
         // Deliver secure OTP email directly to the recipient inbox
         await emailClient.sendOTPEmail({ toEmail: targetEmail, otp });
 
-        return { message: 'A secure verification code has been successfully dispatched to your inbox.' };
+        return { message: 'A secure verification code has been successfully dispatched to your inbox.' , otp};
     };
 
     /**

@@ -1,0 +1,330 @@
+{
+  "info": {
+    "_postman_id": "b7ea7777-jeet-ahirwar-backend-9999",
+    "name": "Ecommerce Backend API",
+    "description": "Enterprise-grade functional API collection representing the dynamic Marketplace endpoints. Fully customized under strict Jeet Ahirwar brand parameters compliance guidelines.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "System Gates",
+      "description": "Foundational entrance and diagnostics gateways endpoints checking pipeline metrics.",
+      "item": [
+        {
+          "name": "Gateway Welcome check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Brand compliance name contains Jeet Ahirwar', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('Jeet Ahirwar');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Verifies central gateway entrance responsiveness, checking dynamic brand variables compliance."
+          },
+          "response": []
+        },
+        {
+          "name": "System Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code represents Success (200) or Service Unavailable (503)', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 503]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Accesses system health metrics and confirms active MongoDB persistence pipeline status."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "description": "Secure customer and merchant signups, credentials validations, and JWT sessions lifecycle operations.",
+      "item": [
+        {
+          "name": "Customer Auth",
+          "description": "Customer verification OTP delivery, profiles registries, aur login session management features.",
+          "item": [
+            {
+              "name": "Send Customer OTP",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 201 Created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.expect(response).to.have.property('message');"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{customerEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/sent/login-signup-otp",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "sent", "login-signup-otp"]
+                },
+                "description": "Generates and mails a secure 6-digit dynamic login verification OTP code."
+              },
+              "response": []
+            },
+            {
+              "name": "Customer Signup",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "if (response.jwt) {",
+                      "    pm.environment.set('accessToken', response.jwt);",
+                      "    console.log('Customer AccessToken successfully rotated inside environment variables!');",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Jeet Ahirwar\",\n  \"email\": \"{{customerEmail}}\",\n  \"otp\": \"{{otp}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/signup",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "signup"]
+                },
+                "description": "Creates a new customer profile and dynamically allocates initial empty Cart within a single transaction."
+              },
+              "response": []
+            },
+            {
+              "name": "Customer Signin",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "if (response.jwt) {",
+                      "    pm.environment.set('accessToken', response.jwt);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"otp\": \"{{otp}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/signin",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "signin"]
+                },
+                "description": "Verifies OTP and generates session tokens for authorized existing platform customers."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Seller Auth",
+          "description": "Merchant verifications, verifications parameters checklists, and onboarding processes controls.",
+          "item": [
+            {
+              "name": "Send Seller OTP",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 201 Created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{sellerEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/sellers/sent/login-top",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["sellers", "sent", "login-top"]
+                },
+                "description": "Dispatches security login OTP to pre-registered business emails. Route typo-matching preserved: 'login-top'."
+              },
+              "response": []
+            },
+            {
+              "name": "Seller Login Verify",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "if (response.jwt) {",
+                      "    pm.environment.set('sellerAccessToken', response.jwt);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{sellerEmail}}\",\n  \"otp\": \"{{otp}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/sellers/verify/login-top",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["sellers", "verify", "login-top"]
+                },
+                "description": "Verifies dynamic verification OTP and issues ROLE_SELLER credentials token sets."
+              },
+              "response": []
+            },
+            {
+              "name": "Verify Seller Email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 OK', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{sellerEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/sellers/verify/{{otp}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["sellers", "verify", "{{otp}}"]
+                },
+                "description": "Captures standard OTP from path and confirms onboarding email verifications, flagging isEmailVerified true."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
