@@ -6,6 +6,21 @@ export const createSellerOrderController = ({ orderService }) =>
 {
 
     /**
+     * Retrieves merchant store orders list chronologically newest first.
+     * Maps exactly to: GET /seller/orders (Seller authorization required)
+     */
+    const getSellerOrders = async (req, res) =>
+    {
+        // Reads authenticated vendor ID directly from decoded Bearer claims (req.user)
+        const sellerId = req.user.id;
+
+        const ordersList = await orderService.getSellerOrders({ sellerId });
+
+        // 202 Accepted: Matches expected e-commerce return code for successful lists retrieval
+        res.status(202).json(ordersList);
+    };
+
+    /**
      * Merchant Order Status Transitions Modifier.
      * Maps exactly to: PATCH /seller/orders/:orderId/status/:orderStatus (Seller authorization required)
      */
@@ -13,8 +28,6 @@ export const createSellerOrderController = ({ orderService }) =>
     {
         // Extracts targets from URL path variables parameters
         const { orderId, orderStatus } = req.params;
-
-        // Reads authenticated vendor ID directly from decoded Bearer claims
         const sellerId = req.user.id;
 
         const updatedOrder = await orderService.updateOrderStatus({
@@ -23,7 +36,6 @@ export const createSellerOrderController = ({ orderService }) =>
             sellerId,
         });
 
-        // 202 Accepted: Matches expected e-commerce return code for async merchant processing commits
         res.status(202).json(updatedOrder);
     };
 
@@ -45,6 +57,7 @@ export const createSellerOrderController = ({ orderService }) =>
     };
 
     return Object.freeze({
+        getSellerOrders,
         updateStatus,
         deleteOrder,
     });

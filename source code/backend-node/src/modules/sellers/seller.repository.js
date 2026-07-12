@@ -1,54 +1,69 @@
 /**
- * Creates a repository for managing sellers.
+ * Pure function-based factory representing the Seller Persistence database interface.
+ * Decouples database collections lookup pipelines using Dependency Injection.
  */
 export const createSellerRepository = ({ Seller }) =>
 {
 
     /**
-     * Find a seller by email.
+     * Locates a registered merchant seller using unique business email.
      */
     const findByEmail = async (email, options = {}) =>
     {
         return Seller.findOne(
             { email: email.toLowerCase() },
-            null, // Return all fields.
-            options // Optional query options (e.g. session).
-        ).lean(); // Return a plain object.
+            null, // Fetches entire schema layout fields
+            options
+        ).lean(); // Returns plain lightweight Javascript object instead of Mongoose documents
     };
 
     /**
-     * Find a seller by ID.
+     * Resolves a seller profile using unique database ObjectId.
      */
     const findById = async (id, options = {}) =>
     {
         return Seller.findById(
             id,
-            { 'bankDetails.accountNumber': 0 }, // Hide the bank account number.
+            { 'bankDetails.accountNumber': 0 }, // Projections Mask: Hides sensitive dynamic bank values
             options
         ).lean();
     };
 
     /**
-     * Create a new seller.
+     * Commits a new seller/merchant register profile into database.
      */
     const create = async (sellerData, options = {}) =>
     {
-        // Using an array supports MongoDB transactions.
         const [newSeller] = await Seller.create([sellerData], options);
-
-        // Convert the document to a plain object.
         return newSeller ? newSeller.toObject() : null;
     };
 
     /**
-     * Update the seller's email verification status.
+     * Commits verification states, flagging seller email confirmed inside database registries.
      */
     const updateVerificationStatus = async ({ id, isEmailVerified }, options = {}) =>
     {
         return Seller.findByIdAndUpdate(
             id,
             { isEmailVerified },
-            { ...options, new: true } // Return the updated document.
+            { ...options, new: true } // Returns updated record state
+        ).lean();
+    };
+
+    /**
+     * Commits administrative account status changes (e.g., ACTIVE, SUSPENDED, BANNED) into database.
+     * Enforces schema enum validations on target state parameter inputs.
+     */
+    const updateAccountStatus = async ({ id, status }, options = {}) =>
+    {
+        return Seller.findByIdAndUpdate(
+            id,
+            { accountStatus: status },
+            {
+                ...options,
+                new: true, // Returns newly updated document state
+                runValidators: true, // Forces Mongoose to run enum checks validations on update
+            }
         ).lean();
     };
 
@@ -57,5 +72,6 @@ export const createSellerRepository = ({ Seller }) =>
         findById,
         create,
         updateVerificationStatus,
+        updateAccountStatus,
     });
 };

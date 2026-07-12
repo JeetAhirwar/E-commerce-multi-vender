@@ -35,6 +35,13 @@ export const createOrderRoutes = ({
         asyncHandler(orderController.getOrderById)
     );
 
+    // Customer Endpoint: Retrieve single ordered product snapshot details (Authentication required)
+    router.get(
+        '/api/orders/item/:orderItemId',
+        authenticate,
+        asyncHandler(orderController.getOrderItemById)
+    );
+
     // Customer Endpoint: Executes order cancellations and refunds updates inside transactions
     router.put(
         '/api/orders/:orderId/cancel',

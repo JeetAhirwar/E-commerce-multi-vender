@@ -1,18 +1,26 @@
-# Jeet Ahirwar Backend Rebuild
+# Jeet Ahirwar Marketplace Backend (REST API Engine)
 
-Node.js 22 LTS + Express 5 + MongoDB + Mongoose technology stack ko use karke design kiya gaya high-performance multi-vendor e-commerce platform backend engine.
+A highly-scalable, production-ready, secure, and loosely-coupled REST API backend designed for multi-vendor e-commerce marketplaces. Rewritten natively from the ground up in Node.js 22 LTS, Express 5, and MongoDB (Mongoose) following strict functional design standards.
 
 ## Core Architectural Philosophies
-1. **Pure Function-based Factory Pattern**: Project me kahin bhi ES6 Classes, classes inheritance, dynamic 'this' contexts or constructor level dependency injection dependencies use nahi kiye gaye hain.
-2. **Modular Domain Isolate Layer**: Har ek e-commerce features (jaise users, product catalogue, carts, checkout, payouts) apne folder me completely localized, testable aur isolated hain.
-3. **YAGNI (You Aren't Gonna Need It)**: Premature abstractions ko strictly bypass kiya gaya hai to optimize system reading execution speeds.
+1. **Pure Function-based Factory Pattern**: Absolutely zero ES6 Classes, inheritance, dynamic 'this' contexts or constructor level dependency injection. All components are built using pure closures and functional factories.
+2. **Decoupled Repositories Abstraction**: High-level business services are completely decoupled from database models. All database interactions go through specialized repository factories, enabling flawless unit testing and database-driver portability.
+3. **YAGNI (You Aren't Gonna Need It)**: Bypasses premature abstractions and third-party bloat to guarantee ultra-fast execution and lightning-fast page loading speeds.
+4. **Strict Security Barriers**: Implements automatic, cryptographically secure OTP hashing, session refresh token rotation (RTR), and secure HttpOnly cookie transport to protect customers credentials.
 
-## Progress Tracking Dashboard
+## Technology Stack
+- **Runtime**: Node.js 22 LTS (ES Modules standard)
+- **Framework**: Express 5 (Native Asynchronous Error handling)
+- **Database**: MongoDB & Mongoose (Object-Document Mapper)
+- **Loggers**: Pino & Pino-HTTP (High-speed asynchronous structured logging)
+- **Testing**: Jest 29 & Supertest (Comprehensive integration and contract test suites)
 
-- [x] **Phase 1: Foundation** (Establish server runtimes, Express 5 bootstrappings, Central error handlers, safe DB managers, Graceful Shutdown signals aur integrated test pipeline)
-- [x] **Phase 2: Domain Models** (Complete database models schema structures design mapping, dynamic pre-validate pricing calculators, self-referential categories tree setups, Mongoose compound and text indexing setup, automated verification OTP TTL automatic garbage collections checks)
-- [ ] **Phase 3: Authentication** (Dynamic Customers Register, Seller OTP logins verifications, password resetting features, JWT tokens rotation aur Cookie refresh configurations setups)
-- [ ] **Phase 4: Catalog** (Products listings dynamic builders, multi-filters categories systems, textual indexing search configurations, CRUD updates with merchant security locks validations)
-- [ ] **Phase 5: Cart, Wishlist, Coupons** (Calculators models recalculating pricing, coupons validity validations checkers aur inventory constraints locks checks)
-- [ ] **Phase 6: Orders and Payments** (Logistics splits calculators, Razorpay/Stripe checkouts dynamic handshakes integration, payment callbacks webhooks atomic triggers)
-- [ ] **Phase 7: Dashboards & Analytics** (Sellers store analytics summaries, administrators management modules, category merchandising controls, charts data aggregates)
+## Installation & Local Development
+
+### 1. Prerequisite Checks
+Ensure you have Node.js 22+ and a local MongoDB instance running on your machine.
+
+### 2. Dependency Resolution
+Clone the repository, navigate to the root directory, and download dependencies:
+```bash
+npm install

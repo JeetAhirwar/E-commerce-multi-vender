@@ -30,7 +30,27 @@ export const createPaymentController = ({ paymentService }) =>
         });
     };
 
+    /**
+     * Re-issues a brand-new, active checkout payment link URL for a pending split order.
+     * Maps exactly to: POST /api/payment/:paymentMethod/order/:orderId (Authentication required)
+     */
+    const reissuePaymentLink = async (req, res) =>
+    {
+        const userId = req.user.id;
+        const { paymentMethod, orderId } = req.params; // Captures path parameters from URL
+
+        const outcome = await paymentService.reissuePaymentLink({
+            orderId,
+            paymentMethod: paymentMethod.toUpperCase().trim(),
+            userId,
+        });
+
+        // 201 Created: Matches expected e-commerce return code for successful payment link re-issuances
+        res.status(201).json(outcome);
+    };
+
     return Object.freeze({
         verifyPayment,
+        reissuePaymentLink, // Added payment link reissue controller method
     });
 };

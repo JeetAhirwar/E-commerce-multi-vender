@@ -28,5 +28,12 @@ export const createWishlistRoutes = ({
         asyncHandler(wishlistController.toggleProductInWishlist)
     );
 
+    // Customer Endpoint: Initializes a brand-new, empty wishlist record linked to a specific user (Legacy route)
+    router.post(
+        '/api/wishlist/create',
+        authenticate,
+        asyncHandler(wishlistController.createWishlist)
+    );
+
     return router;
 };

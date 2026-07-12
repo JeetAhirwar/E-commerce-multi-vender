@@ -52,7 +52,7 @@ export const createOrderService = ({
                 throw createApiError({
                     statusCode: 400,
                     code: 'PRODUCT_DATA_INCOMPLETE',
-                    message: `Checkout failed: Incomplete metadata found on product catalogue item '${item.product ? item.product.title : 'Unknown'}'.`
+                    message: `Checkout failed: Incomplete metadata found on product catalog item '${item.product ? item.product.title : 'Unknown'}'.`
                 });
             }
 
@@ -231,11 +231,9 @@ export const createOrderService = ({
 
     /**
      * Merchant Order Status Updater.
-     * Modifies order dispatch stages (e.g. SHIPPED, DELIVERED) after verifying seller ownership.
      */
     const updateOrderStatus = async ({ orderId, orderStatus, sellerId }) =>
     {
-        // 1. Locate the specific order details
         const order = await orderRepository.findById(orderId);
         if (!order)
         {
@@ -246,7 +244,6 @@ export const createOrderService = ({
             });
         }
 
-        // 2. Security Check: Enforce strictly merchant seller ownership verification
         const isOwner = order.seller._id.toString() === sellerId.toString();
         if (!isOwner)
         {
@@ -257,7 +254,6 @@ export const createOrderService = ({
             });
         }
 
-        // 3. Commit status transition inside database registries
         return orderRepository.updateStatus({ orderId, orderStatus });
     };
 
@@ -286,10 +282,27 @@ export const createOrderService = ({
             });
         }
 
-        // Triggers order deletion inside repositories layer
-        await orderRepository.updateStatus({ orderId, orderStatus: 'CANCELLED' }); // Prefer soft-cancel deletions over hard-erases for financial logging safety
+        await orderRepository.updateStatus({ orderId, orderStatus: 'CANCELLED' });
 
         return { success: true, message: 'Sales order successfully removed.' };
+    };
+
+    /**
+     * Order Item Snapshot lookups.
+     * Resolves specific single item details directly using repository positional operator query.
+     */
+    const getOrderItemById = async ({ orderItemId }) =>
+    {
+        const itemSnapshot = await orderRepository.findOrderItemById(orderItemId);
+        if (!itemSnapshot)
+        {
+            throw createApiError({
+                statusCode: 404,
+                code: 'ORDER_ITEM_NOT_FOUND',
+                message: 'The requested ordered product snapshot was not found.'
+            });
+        }
+        return itemSnapshot;
     };
 
     return Object.freeze({
@@ -300,5 +313,6 @@ export const createOrderService = ({
         cancelOrder,
         updateOrderStatus,
         deleteOrder,
+        getOrderItemById, // Added positional ordered item lookup service
     });
 };

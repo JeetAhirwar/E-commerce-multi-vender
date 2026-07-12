@@ -1,9 +1,23 @@
 /**
  * Pure function-based factory representing the Merchant Seller Authentication HTTP Controllers.
- * Strictly enforces clean isolation architectures, acting as a lightweight API gate.
+ * Strictly enforces thin controller design principles, avoiding classes and context leaks.
  */
 export const createSellerAuthController = ({ sellerAuthService }) =>
 {
+
+    /**
+     * Registers a brand-new merchant seller account (Onboarding).
+     * Maps exactly to: POST /sellers
+     */
+    const createSeller = async (req, res) =>
+    {
+        const sellerPayload = req.body; // Captures complete merchant registration payload
+
+        const newSeller = await sellerAuthService.createSeller(sellerPayload);
+
+        // 201 Created: Standard HTTP code for successful resource creation
+        res.status(201).json(newSeller);
+    };
 
     /**
      * Dispatches login OTP to registered merchant business email ids.
@@ -40,7 +54,7 @@ export const createSellerAuthController = ({ sellerAuthService }) =>
      */
     const verifyEmail = async (req, res) =>
     {
-        // Captures standard dynamic OTP tokens from URL path parameter variables
+        // Captures standard dynamic OTP tokens from URL path variables parameters
         const { otp } = req.params;
 
         // Support email extraction from either body context or optional query string structures
@@ -52,6 +66,7 @@ export const createSellerAuthController = ({ sellerAuthService }) =>
     };
 
     return Object.freeze({
+        createSeller, // Added onboarding controller method
         sendOTP,
         signin,
         verifyEmail,

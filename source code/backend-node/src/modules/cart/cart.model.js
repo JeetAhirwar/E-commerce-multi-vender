@@ -78,7 +78,7 @@ const CartSchema = new mongoose.Schema({
 });
 
 // Indexes to improve query performance.
-CartSchema.index({ user: 1 });
+// CartSchema.index({ user: 1 });
 CartSchema.index({ 'items.product': 1 }); // Helps search cart items by product.
 
 export const Cart = mongoose.model('Cart', CartSchema);

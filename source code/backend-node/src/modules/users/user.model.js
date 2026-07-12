@@ -86,7 +86,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Indexes to improve query performance.
-UserSchema.index({ email: 1 });
+// UserSchema.index({ email: 1 });
 UserSchema.index({ role: 1 });
 
 export const User = mongoose.model('User', UserSchema);

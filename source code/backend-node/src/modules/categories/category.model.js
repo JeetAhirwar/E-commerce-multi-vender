@@ -34,7 +34,7 @@ const CategorySchema = new mongoose.Schema({
 });
 
 // Indexes to improve query performance.
-CategorySchema.index({ categoryId: 1 });
+// CategorySchema.index({ categoryId: 1 });
 CategorySchema.index({ level: 1 });
 CategorySchema.index({ parentCategory: 1 });
 

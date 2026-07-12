@@ -14,19 +14,16 @@ export const createOrderController = ({ orderService, paymentService }) =>
     {
         const userId = req.user.id;
         const shippingAddress = req.body;
-        const { paymentMethod } = req.query; // Reads from query parameter: ?paymentMethod=RAZORPAY
+        const { paymentMethod } = req.query;
 
-        // 1. Process and persist individual split orders inside database registries
         const { splitOrders, finalPayableAmount } = await orderService.createOrdersFromCart({
             userId,
             shippingAddress,
             paymentMethod,
         });
 
-        // 2. Map split orders database IDs to build parent payment order aggregate container
         const ordersList = splitOrders.map((order) => order._id);
 
-        // 3. Handshake with Stripe/Razorpay SDKs to generate dynamic checkout URL
         const { payment_link_url } = await paymentService.createPaymentOrder({
             userId,
             amount: finalPayableAmount,
@@ -34,7 +31,6 @@ export const createOrderController = ({ orderService, paymentService }) =>
             paymentMethod,
         });
 
-        // 200 OK: Delivers exact payload structure expected by React Frontend to redirect customer browser
         res.status(200).json({ payment_link_url });
     };
 
@@ -48,7 +44,6 @@ export const createOrderController = ({ orderService, paymentService }) =>
 
         const ordersList = await orderService.getUserOrders({ userId });
 
-        // 202 Accepted: Match Spring Boot return statuses spec cleanly
         res.status(202).json(ordersList);
     };
 
@@ -101,11 +96,26 @@ export const createOrderController = ({ orderService, paymentService }) =>
         res.status(200).json(cancelledOrder);
     };
 
+    /**
+     * Retrieves single order item snapshot details.
+     * Maps exactly to: GET /api/orders/item/:orderItemId (Authentication required)
+     */
+    const getOrderItemById = async (req, res) =>
+    {
+        const { orderItemId } = req.params; // Captures unique subdocument ID from URL path variables
+
+        const itemSnapshot = await orderService.getOrderItemById({ orderItemId });
+
+        // 202 Accepted: Matches expected e-commerce return code for successful item retrieval
+        res.status(202).json(itemSnapshot);
+    };
+
     return Object.freeze({
         createOrders,
         getUserOrders,
         getSellerOrders,
         getOrderById,
         cancelOrder,
+        getOrderItemById, // Added single item snapshot controller method
     });
 };

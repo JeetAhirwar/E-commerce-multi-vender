@@ -21,5 +21,12 @@ export const createPaymentRoutes = ({
         asyncHandler(paymentController.verifyPayment)
     );
 
+    // Customer Endpoint: Re-issues a brand-new, active checkout payment link URL for a pending split order
+    router.post(
+        '/api/payment/:paymentMethod/order/:orderId',
+        authenticate,
+        asyncHandler(paymentController.reissuePaymentLink)
+    );
+
     return router;
 };

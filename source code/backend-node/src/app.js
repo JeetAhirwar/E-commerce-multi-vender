@@ -26,6 +26,12 @@ import { Order } from './modules/orders/order.model.js';
 import { PaymentOrder } from './modules/payments/paymentOrder.model.js';
 import { Transaction } from './modules/transactions/transaction.model.js';
 import { SellerReport } from './modules/reports/sellerReport.model.js';
+import { Review } from './modules/reviews/review.model.js';
+import { Notification } from './modules/notifications/notification.model.js';
+import { PasswordResetToken } from './modules/auth/passwordResetToken.model.js';
+import { RefreshToken } from './modules/auth/refreshToken.model.js';
+import { Deal } from './modules/deals/deal.model.js';
+import { HomeCategory } from './modules/home/homeCategory.model.js';
 
 // Persistence Repositories Factories
 import { createUserRepository } from './modules/users/user.repository.js';
@@ -40,6 +46,12 @@ import { createOrderRepository } from './modules/orders/order.repository.js';
 import { createPaymentOrderRepository } from './modules/payments/paymentOrder.repository.js';
 import { createTransactionRepository } from './modules/transactions/transaction.repository.js';
 import { createSellerReportRepository } from './modules/reports/sellerReport.repository.js';
+import { createReviewRepository } from './modules/reviews/review.repository.js';
+import { createNotificationRepository } from './modules/notifications/notification.repository.js';
+import { createPasswordResetTokenRepository } from './modules/auth/passwordResetToken.repository.js';
+import { createRefreshTokenRepository } from './modules/auth/refreshToken.repository.js';
+import { createDealRepository } from './modules/deals/deal.repository.js';
+import { createHomeCategoryRepository } from './modules/home/homeCategory.repository.js';
 
 // Integration Adapters Factories
 import { createEmailClient } from './integrations/email/nodemailer.client.js';
@@ -54,8 +66,16 @@ import { createWishlistService } from './modules/wishlist/wishlist.service.js';
 import { createCouponService } from './modules/coupons/coupon.service.js';
 import { createOrderService } from './modules/orders/order.service.js';
 import { createPaymentService } from './modules/payments/payment.service.js';
+import { createRevenueService } from './modules/reports/revenue.service.js';
+import { createSellerService } from './modules/sellers/seller.service.js';
+import { createReviewService } from './modules/reviews/review.service.js';
+import { createNotificationService } from './modules/notifications/notification.service.js';
+import { createAiService } from './modules/ai/ai.service.js';
+import { createDealService } from './modules/deals/deal.service.js';
+import { createTransactionService } from './modules/transactions/transaction.service.js';
+import { createHomeService } from './modules/home/home.service.js';
 
-// HTTP Controllers Factories (Added createPaymentController)
+// HTTP Controllers Factories
 import { createAuthController } from './modules/auth/auth.controller.js';
 import { createSellerAuthController } from './modules/auth/sellerAuth.controller.js';
 import { createProductController } from './modules/products/product.controller.js';
@@ -64,9 +84,18 @@ import { createWishlistController } from './modules/wishlist/wishlist.controller
 import { createCouponController } from './modules/coupons/coupon.controller.js';
 import { createOrderController } from './modules/orders/order.controller.js';
 import { createSellerOrderController } from './modules/orders/sellerOrder.controller.js';
-import { createPaymentController } from './modules/payments/payment.controller.js'; // Added Payment controller
+import { createPaymentController } from './modules/payments/payment.controller.js';
+import { createRevenueController } from './modules/reports/revenue.controller.js';
+import { createAdminController } from './modules/admin/admin.controller.js';
+import { createSellerController } from './modules/sellers/seller.controller.js';
+import { createReviewController } from './modules/reviews/review.controller.js';
+import { createNotificationController } from './modules/notifications/notification.controller.js';
+import { createAiController } from './modules/ai/ai.controller.js';
+import { createDealController } from './modules/deals/deal.controller.js';
+import { createTransactionController } from './modules/transactions/transaction.controller.js';
+import { createHomeMailController } from './modules/home/home.controller.js';
 
-// Routing Gateway Compilers (Added createPaymentRoutes)
+// Routing Gateway Compilers
 import { createAuthRoutes } from './modules/auth/auth.routes.js';
 import { createProductRoutes } from './modules/products/product.routes.js';
 import { createCartRoutes } from './modules/cart/cart.routes.js';
@@ -74,7 +103,16 @@ import { createWishlistRoutes } from './modules/wishlist/wishlist.routes.js';
 import { createCouponRoutes } from './modules/coupons/coupon.routes.js';
 import { createOrderRoutes } from './modules/orders/order.routes.js';
 import { createSellerOrderRoutes } from './modules/orders/sellerOrder.routes.js';
-import { createPaymentRoutes } from './modules/payments/payment.routes.js'; // Added Payment routes compiler
+import { createPaymentRoutes } from './modules/payments/payment.routes.js';
+import { createRevenueRoutes } from './modules/reports/revenue.routes.js';
+import { createAdminRoutes } from './modules/admin/admin.routes.js';
+import { createSellerRoutes } from './modules/sellers/seller.routes.js';
+import { createReviewRoutes } from './modules/reviews/review.routes.js';
+import { createNotificationRoutes } from './modules/notifications/notification.routes.js';
+import { createAiRoutes } from './modules/ai/ai.routes.js';
+import { createDealRoutes } from './modules/deals/deal.routes.js';
+import { createTransactionRoutes } from './modules/transactions/transaction.routes.js';
+import { createHomeRoutes } from './modules/home/home.routes.js';
 
 /**
  * Functional dependency-injection based Express App Creator.
@@ -100,6 +138,10 @@ export const createApp = ({ env, dbManager }) =>
     // 3. System Credentials secrets config settings
     const jwtAccessSecret = process.env.JWT_ACCESS_SECRET || 'simulation_jeet_access_secret_token_777';
     const jwtAccessExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
+
+    // Session refresh token configurations parameters
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'simulation_jeet_refresh_secret_token_777';
+    const jwtRefreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
 
     // =========================================================================
@@ -134,6 +176,12 @@ export const createApp = ({ env, dbManager }) =>
     const paymentOrderRepository = createPaymentOrderRepository({ PaymentOrder });
     const transactionRepository = createTransactionRepository({ Transaction });
     const sellerReportRepository = createSellerReportRepository({ SellerReport });
+    const reviewRepository = createReviewRepository({ Review });
+    const notificationRepository = createNotificationRepository({ Notification });
+    const passwordResetTokenRepository = createPasswordResetTokenRepository({ PasswordResetToken });
+    const refreshTokenRepository = createRefreshTokenRepository({ RefreshToken });
+    const dealRepository = createDealRepository({ Deal });
+    const homeCategoryRepository = createHomeCategoryRepository({ HomeCategory });
 
     // B. Setup Nodemailer Integration
     const emailClient = createEmailClient({
@@ -165,12 +213,17 @@ export const createApp = ({ env, dbManager }) =>
         userRepository,
         cartRepository,
         verificationCodeRepository,
+        passwordResetTokenRepository,
+        refreshTokenRepository,
         generateOTP,
         emailClient,
         signToken,
+        verifyToken,
         createApiError,
         jwtAccessSecret,
         jwtAccessExpiresIn,
+        jwtRefreshSecret,
+        jwtRefreshExpiresIn,
     });
 
     const sellerAuthService = createSellerAuthService({
@@ -233,6 +286,54 @@ export const createApp = ({ env, dbManager }) =>
         createApiError,
     });
 
+    const rtrService = authService; // References RTR token rotations actions cleanly
+
+    const revenueService = createRevenueService({
+        orderRepository,
+        createApiError,
+    });
+
+    const sellerService = createSellerService({
+        sellerRepository,
+        createApiError,
+    });
+
+    const reviewService = createReviewService({
+        reviewRepository,
+        productRepository,
+        createApiError,
+    });
+
+    const notificationService = createNotificationService({
+        notificationRepository,
+        userRepository,
+        createApiError,
+    });
+
+    const aiService = createAiService({
+        cartRepository,
+        productRepository,
+        orderRepository,
+        createApiError,
+    });
+
+    const dealService = createDealService({
+        dealRepository,
+        createApiError,
+    });
+
+    const transactionService = createTransactionService({
+        transactionRepository,
+        orderRepository,
+        createApiError,
+    });
+
+    const homeService = createHomeService({
+        homeCategoryRepository,
+        dealRepository,
+        createApiError,
+    });
+
     // E. Setup Thin HTTP Controllers
     const authController = createAuthController({ authService });
     const sellerAuthController = createSellerAuthController({ sellerAuthService });
@@ -242,7 +343,16 @@ export const createApp = ({ env, dbManager }) =>
     const couponController = createCouponController({ couponService });
     const orderController = createOrderController({ orderService, paymentService });
     const sellerOrderController = createSellerOrderController({ orderService });
-    const paymentController = createPaymentController({ paymentService }); // Instantiated Payment controller
+    const paymentController = createPaymentController({ paymentService });
+    const revenueController = createRevenueController({ revenueService });
+    const adminController = createAdminController({ sellerService });
+    const sellerController = createSellerController({ sellerService, sellerReportRepository });
+    const reviewController = createReviewController({ reviewService });
+    const notificationController = createNotificationController({ notificationService });
+    const aiController = createAiController({ aiService });
+    const dealController = createDealController({ dealService });
+    const transactionController = createTransactionController({ transactionService });
+    const homeController = createHomeMailController({ homeService, homeCategoryRepository });
 
     // F. Assembly Routes
     const rawAuthRouterInstance = express.Router();
@@ -250,6 +360,7 @@ export const createApp = ({ env, dbManager }) =>
         router: rawAuthRouterInstance,
         authController,
         sellerAuthController,
+        authenticate,
         asyncHandler,
     });
 
@@ -304,12 +415,90 @@ export const createApp = ({ env, dbManager }) =>
         asyncHandler,
     });
 
-    // Assemblies Payment verification routing pipelines (Injects standard authenticators filters)
     const rawPaymentRouterInstance = express.Router();
     const paymentRoutes = createPaymentRoutes({
         router: rawPaymentRouterInstance,
         paymentController,
         authenticate,
+        asyncHandler,
+    });
+
+    const rawRevenueRouterInstance = express.Router();
+    const revenueRoutes = createRevenueRoutes({
+        router: rawRevenueRouterInstance,
+        revenueController,
+        authenticate,
+        authorizeRoles,
+        asyncHandler,
+    });
+
+    const rawAdminRouterInstance = express.Router();
+    const adminRoutes = createAdminRoutes({
+        router: rawAdminRouterInstance,
+        adminController,
+        authenticate,
+        authorizeRoles,
+        asyncHandler,
+    });
+
+    // Instantiates Seller Routes cleanly (ADDED THIS INSTANTIATION!)
+    const rawSellerRouterInstance = express.Router();
+    const sellerRoutes = createSellerRoutes({
+        router: rawSellerRouterInstance,
+        sellerController,
+        authenticate,
+        authorizeRoles,
+        asyncHandler,
+    });
+
+    const rawReviewRouterInstance = express.Router();
+    const reviewRoutes = createReviewRoutes({
+        router: rawReviewRouterInstance,
+        reviewController,
+        authenticate,
+        asyncHandler,
+    });
+
+    const rawNotificationRouterInstance = express.Router();
+    const notificationRoutes = createNotificationRoutes({
+        router: rawNotificationRouterInstance,
+        notificationController,
+        authenticate,
+        asyncHandler,
+    });
+
+    const rawAiRouterInstance = express.Router();
+    const aiRoutes = createAiRoutes({
+        router: rawAiRouterInstance,
+        aiController,
+        authenticate,
+        asyncHandler,
+    });
+
+    const rawDealRouterInstance = express.Router();
+    const dealRoutes = createDealRoutes({
+        router: rawDealRouterInstance,
+        dealController,
+        authenticate,
+        authorizeRoles,
+        asyncHandler,
+    });
+
+    const rawTransactionRouterInstance = express.Router();
+    const transactionRoutes = createTransactionRoutes({
+        router: rawTransactionRouterInstance,
+        transactionController,
+        authenticate,
+        authorizeRoles,
+        asyncHandler,
+    });
+
+    const rawHomeRouterInstance = express.Router();
+    const homeRoutes = createHomeRoutes({
+        router: rawHomeRouterInstance,
+        homeController,
+        authenticate,
+        authorizeRoles,
         asyncHandler,
     });
 
@@ -356,6 +545,7 @@ export const createApp = ({ env, dbManager }) =>
     app.use(productRoutes);
 
     // Mount shopping cart pathways
+    app.use(cors());
     app.use(cartRoutes);
 
     // Mount wishlist pathways
@@ -372,6 +562,33 @@ export const createApp = ({ env, dbManager }) =>
 
     // Mount payment verification pathways
     app.use(paymentRoutes);
+
+    // Mount seller revenue analytics pathways
+    app.use(revenueRoutes);
+
+    // Mount admin moderation pathways
+    app.use(adminRoutes);
+
+    // Mount seller profile and administrative seller management pathways
+    app.use(sellerRoutes);
+
+    // Mount reviews pathways
+    app.use(reviewRoutes);
+
+    // Mount notifications pathways
+    app.use(notificationRoutes);
+
+    // Mount AI chatbot pathways
+    app.use(aiRoutes);
+
+    // Mount campaign deals pathways
+    app.use(dealRoutes);
+
+    // Mount transaction ledger pathways
+    app.use(transactionRoutes);
+
+    // Mount homepage merchandising pathways
+    app.use(homeRoutes);
 
     // Wildcard Fallback Route for non-existent system paths
     app.use((req, res, next) =>

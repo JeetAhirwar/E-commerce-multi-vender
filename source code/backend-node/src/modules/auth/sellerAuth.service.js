@@ -19,20 +19,72 @@ export const createSellerAuthService = ({
     /**
      * Internal high-speed SHA-256 OTP hashing utility.
      */
-    const hashOTP = (otp) =>
+    const hashString = (data) =>
     {
-        return crypto.createHash('sha256').update(otp).digest('hex');
+        return crypto.createHash('sha256').update(data).digest('hex');
+    };
+
+    /**
+     * Onboards a brand-new merchant seller account.
+     * Generates email verification OTP and dispatches welcome verification mail atomically.
+     */
+    const createSeller = async (sellerData) =>
+    {
+        const targetEmail = sellerData.email.toLowerCase().trim();
+
+        // 1. Core Check: Prevent duplicate email registration attempts
+        const existingSeller = await sellerRepository.findByEmail(targetEmail);
+        if (existingSeller)
+        {
+            throw createApiError({
+                statusCode: 409,
+                code: 'DUPLICATE_SELLER_EMAIL',
+                message: `Onboarding failed: A business merchant profile is already registered under '${targetEmail}'.`
+            });
+        }
+
+        // 2. Hash credential password securely prior to saving
+        const encryptedPassword = sellerData.password
+            ? hashString(sellerData.password)
+            : null;
+
+        // 3. Commit seller write operations directly into database
+        const newSeller = await sellerRepository.create({
+            ...sellerData,
+            email: targetEmail,
+            passwordHash: encryptedPassword,
+            role: 'ROLE_SELLER',
+            isEmailVerified: false,
+            accountStatus: 'PENDING_VERIFICATION' // Starts as pending moderation
+        });
+
+        // 4. Generate dynamic 6-digit email-verification OTP
+        const otp = generateOTP();
+        const otpHash = hashString(otp);
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // Valid for exactly 10 minutes
+
+        // 5. Persist code state using verification repository
+        await verificationCodeRepository.deleteExistingCodes({ email: targetEmail, purpose: 'SELLER_EMAIL_VERIFICATION' });
+        await verificationCodeRepository.saveCode({
+            email: targetEmail,
+            otpHash,
+            purpose: 'SELLER_EMAIL_VERIFICATION',
+            expiresAt,
+        });
+
+        // 6. Deliver welcome verification OTP directly to the merchant inbox
+        await emailClient.sendOTPEmail({ toEmail: targetEmail, otp });
+
+        return newSeller;
     };
 
     /**
      * Dispatched verification OTP for existing onboarded sellers.
-     * Verifies if merchant exists and is not banned/suspended prior to transmission.
      */
     const sendSellerLoginOtp = async ({ email }) =>
     {
         const targetEmail = email.toLowerCase().trim();
 
-        // 1. Core Check: Vendor must exist in registries
         const sellerExists = await sellerRepository.findByEmail(targetEmail);
         if (!sellerExists)
         {
@@ -43,7 +95,6 @@ export const createSellerAuthService = ({
             });
         }
 
-        // 2. Security Check: Vendor must have an active moderation status (not banned/suspended)
         if (sellerExists.accountStatus === 'BANNED' || sellerExists.accountStatus === 'SUSPENDED')
         {
             throw createApiError({
@@ -53,12 +104,10 @@ export const createSellerAuthService = ({
             });
         }
 
-        // 3. Compile new secure verification OTP
         const otp = generateOTP();
-        const otpHash = hashOTP(otp);
+        const otpHash = hashString(otp);
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // Valid for exactly 10 minutes
 
-        // 4. Update data tables and send security email
         await verificationCodeRepository.deleteExistingCodes({ email: targetEmail, purpose: 'SELLER_LOGIN' });
         await verificationCodeRepository.saveCode({
             email: targetEmail,
@@ -79,7 +128,6 @@ export const createSellerAuthService = ({
     {
         const targetEmail = email.toLowerCase().trim();
 
-        // 1. Locate seller profiles parameters
         const sellerExists = await sellerRepository.findByEmail(targetEmail);
         if (!sellerExists)
         {
@@ -90,7 +138,6 @@ export const createSellerAuthService = ({
             });
         }
 
-        // 2. Pull active verification token
         const activeCode = await verificationCodeRepository.findActiveCode({
             email: targetEmail,
             purpose: 'SELLER_LOGIN',
@@ -105,7 +152,6 @@ export const createSellerAuthService = ({
             });
         }
 
-        // 3. Brute force defense throttling limits check
         if (activeCode.attemptCount >= 3)
         {
             await verificationCodeRepository.markAsConsumed({ id: activeCode._id });
@@ -116,8 +162,7 @@ export const createSellerAuthService = ({
             });
         }
 
-        // 4. Crypto SHA256 matches evaluation checks
-        const inputHash = hashOTP(otp);
+        const inputHash = hashString(otp);
         if (activeCode.otpHash !== inputHash)
         {
             await verificationCodeRepository.incrementAttempts({ id: activeCode._id });
@@ -128,10 +173,8 @@ export const createSellerAuthService = ({
             });
         }
 
-        // Terminate validation code securely
         await verificationCodeRepository.markAsConsumed({ id: activeCode._id });
 
-        // 5. Generate secure standard system tokens payload
         const tokenPayload = { id: sellerExists._id, email: sellerExists.email, role: sellerExists.role };
         const accessToken = signToken({ payload: tokenPayload, secret: jwtAccessSecret, expiresIn: jwtAccessExpiresIn });
 
@@ -145,13 +188,11 @@ export const createSellerAuthService = ({
 
     /**
      * Standard Email Verification Pipeline (Finalizes merchant registers).
-     * Locates verification code and flags merchant email confirmed inside database registries.
      */
     const verifySellerEmailByOtp = async ({ email, otp }) =>
     {
         const targetEmail = email.toLowerCase().trim();
 
-        // 1. Pull dynamic active registration email verification code
         const activeCode = await verificationCodeRepository.findActiveCode({
             email: targetEmail,
             purpose: 'SELLER_EMAIL_VERIFICATION',
@@ -166,7 +207,6 @@ export const createSellerAuthService = ({
             });
         }
 
-        // 2. Brute force check
         if (activeCode.attemptCount >= 3)
         {
             await verificationCodeRepository.markAsConsumed({ id: activeCode._id });
@@ -177,8 +217,7 @@ export const createSellerAuthService = ({
             });
         }
 
-        // 3. Crypto Hash check matching
-        const inputHash = hashOTP(otp);
+        const inputHash = hashString(otp);
         if (activeCode.otpHash !== inputHash)
         {
             await verificationCodeRepository.incrementAttempts({ id: activeCode._id });
@@ -189,10 +228,8 @@ export const createSellerAuthService = ({
             });
         }
 
-        // Terminate active verification session
         await verificationCodeRepository.markAsConsumed({ id: activeCode._id });
 
-        // 4. Update dynamic state: Pull seller and set isEmailVerified: true
         const seller = await sellerRepository.findByEmail(targetEmail);
         if (!seller)
         {
@@ -203,7 +240,6 @@ export const createSellerAuthService = ({
             });
         }
 
-        // Commit changes into database
         const verifiedSeller = await sellerRepository.updateVerificationStatus({ id: seller._id, isEmailVerified: true });
 
         return {
@@ -214,6 +250,7 @@ export const createSellerAuthService = ({
     };
 
     return Object.freeze({
+        createSeller, // Added onboarding action
         sendSellerLoginOtp,
         verifySellerLoginOtp,
         verifySellerEmailByOtp,

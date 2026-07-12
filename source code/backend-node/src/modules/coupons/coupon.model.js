@@ -53,7 +53,7 @@ const CouponSchema = new mongoose.Schema({
 });
 
 // Indexes to improve query performance.
-CouponSchema.index({ code: 1 });
+// CouponSchema.index({ code: 1 });
 CouponSchema.index({ isActive: 1, validityStartDate: 1, validityEndDate: 1 });
 
 export const Coupon = mongoose.model('Coupon', CouponSchema);

@@ -7,7 +7,6 @@ export const createOrderRepository = ({ Order }) =>
 
     /**
      * Commits a new split order document directly into database.
-     * Supports array-wrap configurations to run smoothly inside transactions.
      */
     const createOrder = async (orderData, options = {}) =>
     {
@@ -22,8 +21,8 @@ export const createOrderRepository = ({ Order }) =>
     {
         return Order.find({ user: userId }, null, options)
             .sort({ orderDate: -1 })
-            .populate('seller', 'sellerName email mobile businessDetails') // Populates seller metadata securely
-            .lean(); // Returns plain lightweight JS objects for fast memory rendering
+            .populate('seller', 'sellerName email mobile businessDetails')
+            .lean();
     };
 
     /**
@@ -33,7 +32,7 @@ export const createOrderRepository = ({ Order }) =>
     {
         return Order.find({ seller: sellerId }, null, options)
             .sort({ orderDate: -1 })
-            .populate('user', 'fullName email mobile') // Populates customer details
+            .populate('user', 'fullName email mobile')
             .lean();
     };
 
@@ -49,19 +48,19 @@ export const createOrderRepository = ({ Order }) =>
     };
 
     /**
-     * Commits operational order status updates (e.g., SHIPPED, DELIVERED) into database.
+     * Commits administrative account status changes (e.g., ACTIVE, SUSPENDED, BANNED) into database.
      */
     const updateStatus = async ({ orderId, orderStatus }, options = {}) =>
     {
         return Order.findByIdAndUpdate(
             orderId,
             { orderStatus },
-            { ...options, new: true, runValidators: true } // Returns updated record enforcing schema validations
+            { ...options, new: true, runValidators: true }
         ).lean();
     };
 
     /**
-     * Commits payment status updates (e.g., COMPLETED, FAILED) into database.
+     * Commits payment status updates into database.
      */
     const updatePaymentStatus = async ({ orderId, paymentStatus }, options = {}) =>
     {
@@ -72,6 +71,21 @@ export const createOrderRepository = ({ Order }) =>
         ).lean();
     };
 
+    /**
+     * Locates and retrieves a specific embedded ordered product snapshot by its unique subdocument ID.
+     * Leverages MongoDB Positional Projection Operator ($) to avoid loading unrelated array elements.
+     */
+    const findOrderItemById = async (orderItemId, options = {}) =>
+    {
+        const order = await Order.findOne(
+            { 'orderItems._id': orderItemId }, // Locates order containing target subdocument item ID
+            { 'orderItems.$': 1 }, // Positional Projection: Returns only the matching array element!
+            options
+        ).lean();
+
+        return order && order.orderItems ? order.orderItems[0] : null;
+    };
+
     return Object.freeze({
         createOrder,
         findByUser,
@@ -79,5 +93,6 @@ export const createOrderRepository = ({ Order }) =>
         findById,
         updateStatus,
         updatePaymentStatus,
+        findOrderItemById, // Added positional ordered item subdocument lookup
     });
 };

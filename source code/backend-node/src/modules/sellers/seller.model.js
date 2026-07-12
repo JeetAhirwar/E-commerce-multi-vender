@@ -136,7 +136,7 @@ const SellerSchema = new mongoose.Schema({
 });
 
 // Indexes for faster database queries.
-SellerSchema.index({ email: 1 });
+// SellerSchema.index({ email: 1 });
 SellerSchema.index({ accountStatus: 1 });
 
 export const Seller = mongoose.model('Seller', SellerSchema);
